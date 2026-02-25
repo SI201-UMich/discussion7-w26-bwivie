@@ -30,13 +30,63 @@ def load_listings(f):
     base_path = os.path.abspath(os.path.dirname(__file__))
     full_path = os.path.join(base_path, f)
 
+    with open(full_path, 'r', encoding='utf-8', newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        rows = list(reader)
+        
     # TODO: Read the CSV using csv.reader and convert it to a list a dictionaries
-    pass
+    if not rows:
+        return []
+
+    header = rows[0]
+    listings = []
+    for row in rows[1:]:
+        # Skip completely empty lines
+        if not row or all(cell.strip() == "" for cell in row):
+            continue
+
+        # If a row is shorter than header, pad it; if longer, truncate
+        if len(row) < len(header):
+            row = row + [""] * (len(header) - len(row))
+        elif len(row) > len(header):
+            row = row[:len(header)]
+
+        listings.append(dict(zip(header, row)))
+
+    return listings
 
 ###############################################################################
 ##### TASK 2: CALCULATION FUNCTION (single calculation)
 ###############################################################################
 def calculate_avg_price_by_neighbourhood_group_and_room(listings):
+
+    totals = {}  # (neighbourhood_group, room_type) -> total_price
+    counts = {}  # (neighbourhood_group, room_type) -> count
+
+    for listing in listings:
+        ng = listing.get('neighbourhood_group', '').strip()
+        rt = listing.get('room_type', '').strip()
+        price_str = listing.get('price', '').strip()
+
+        # Skip if missing key fields
+        if ng == "" or rt == "" or price_str == "":
+            continue
+
+        # Convert price to float; skip bad values
+        try:
+            price = float(price_str)
+        except ValueError:
+            continue
+
+        key = (ng, rt)
+        totals[key] = totals.get(key, 0.0) + price
+        counts[key] = counts.get(key, 0) + 1
+
+    averages = {}
+    for key in totals:
+        averages[key] = totals[key] / counts[key]
+
+    return averages
     """
     Calculate the average nightly price for each (neighbourhood_group, room_type) pair.
 
@@ -51,7 +101,7 @@ def calculate_avg_price_by_neighbourhood_group_and_room(listings):
         dict mapping (neighbourhood_group, room_type) -> average_price (float)
         e.g. { ('Downtown', 'Entire home/apt'): 123.45, ... }
     """
-    pass
+    
 
 
 
@@ -59,6 +109,14 @@ def calculate_avg_price_by_neighbourhood_group_and_room(listings):
 ##### TASK 3: CSV WRITER
 ###############################################################################
 def write_summary_csv(out_filename, avg_prices):
+    
+    with open(out_filename, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['neighbourhood_group', 'room_type', 'average_price'])
+
+        # Sort for stable output (helps testing / debugging)
+        for (ng, rt), avg in sorted(avg_prices.items(), key=lambda x: (x[0][0], x[0][1])):
+            writer.writerow([ng, rt, avg])
     """
     Write the summary statistics to a CSV file.
 
