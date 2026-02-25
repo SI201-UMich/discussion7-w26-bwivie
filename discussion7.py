@@ -59,7 +59,7 @@ def load_listings(f):
 ##### TASK 2: CALCULATION FUNCTION (single calculation)
 ###############################################################################
 def calculate_avg_price_by_neighbourhood_group_and_room(listings):
-
+    
     totals = {}  # (neighbourhood_group, room_type) -> total_price
     counts = {}  # (neighbourhood_group, room_type) -> count
 
@@ -101,7 +101,7 @@ def calculate_avg_price_by_neighbourhood_group_and_room(listings):
         dict mapping (neighbourhood_group, room_type) -> average_price (float)
         e.g. { ('Downtown', 'Entire home/apt'): 123.45, ... }
     """
-    
+    pass
 
 
 
@@ -109,14 +109,6 @@ def calculate_avg_price_by_neighbourhood_group_and_room(listings):
 ##### TASK 3: CSV WRITER
 ###############################################################################
 def write_summary_csv(out_filename, avg_prices):
-    
-    with open(out_filename, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(['neighbourhood_group', 'room_type', 'average_price'])
-
-        # Sort for stable output (helps testing / debugging)
-        for (ng, rt), avg in sorted(avg_prices.items(), key=lambda x: (x[0][0], x[0][1])):
-            writer.writerow([ng, rt, avg])
     """
     Write the summary statistics to a CSV file.
 
